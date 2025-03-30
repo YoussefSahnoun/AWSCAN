@@ -44,7 +44,7 @@ def validate_creds(
         return (False, f"❌ Unexpected Error: {e}", None)
 
 
-# If you want to use later call this module and pass credentiels to get a session to test on
+# If you want to use later call this module and pass credentials to get a session to test on
 # session=validate_creds(**creds)[2]
 # then u can use session.client(...)
 
