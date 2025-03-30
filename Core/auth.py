@@ -2,19 +2,16 @@ import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from typing import Tuple, Optional
 
-def validate_creds(
-    access_key: str,
-    secret_key: str,
-    session_token: Optional[str] = None
-) -> Tuple[bool, str, Optional[boto3.Session]]:
+def validate_creds(access_key,secret_key,session_token) -> Tuple[bool, str, Optional[boto3.Session]]:
     """
     Validates credentials AND returns a usable Boto3 session.
     
     Returns:
         Tuple: (success: bool, message: str, session: Optional[boto3.Session])
     """
+    
     try:
-        session = boto3.Session(
+        session = boto3.session.Session(
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
             aws_session_token=session_token
