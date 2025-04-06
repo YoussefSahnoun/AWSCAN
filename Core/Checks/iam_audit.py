@@ -104,7 +104,7 @@ def show_remediation(findings):
     return 0
 
 
-def run_iam_audit(session):
+def run_audit(session):
     all_findings = []
     all_findings.extend(check_cis_1_1(session))
     all_findings.extend(check_cis_1_2(session))
