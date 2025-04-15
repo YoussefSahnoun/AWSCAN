@@ -18,7 +18,7 @@ CONDITIONAL_SERVICES = {
 AUDIT_MODULES = {
     's3': 's3_audit',
     'iam': 'iam_audit',       # ADDED IAM MODULE
-    # 'ec2': 'ec2_audit',     # To be added later
+    'ec2': 'ec2_audit',     # To be added later
 }
 
 def discover_enabled_services(session):
