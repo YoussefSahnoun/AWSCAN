@@ -79,29 +79,10 @@ def check_cis_1_2(session):
 
 
 def generate_report(findings):
-    report = defaultdict(list)
-    
+    print("S3 CIS Benchmark Results:")
     for finding in findings:
-        report[finding['check_id']].append({
-            'resource': finding['resource'],
-            'status': finding['status'],
-            'evidence': finding['evidence']
-        })
-
-    print("IAM CIS Benchmark Results:")
-    for check_id, results in report.items():
-        print(f"\n{check_id} Findings:")
-        print(f"{'-'*40}")
-        for result in results:
-            print(f"Resource: {result['resource']}")
-            print(f"Status: {result['status']}")
-            print(f"Evidence: {result['evidence']}")
-            print("-"*40)
-
-
-# To be implemented later
-def show_remediation(findings):
-    return 0
+        print(finding)
+        print("-"*40)
 
 
 def run_audit(session):
@@ -110,4 +91,3 @@ def run_audit(session):
     all_findings.extend(check_cis_1_2(session))
 
     generate_report(all_findings)
-    show_remediation(all_findings)

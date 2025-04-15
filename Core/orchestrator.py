@@ -1,4 +1,4 @@
-from auth import *
+from .auth import *
 import time
 from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
@@ -46,7 +46,7 @@ def discover_enabled_services(session):
 
 def run_audit(service, session):
     try:
-        module_name = f'Checks.{AUDIT_MODULES[service]}'
+        module_name = f'Core.Checks.{AUDIT_MODULES[service]}'
         module = importlib.import_module(module_name)
         return module.run_audit(session)
     except Exception as e:
@@ -65,26 +65,9 @@ def organize_results(all_results):
                 report[finding['service']].append(finding)
     return report
 
-def main():
-    access_key = input('Enter your access key: ')
-    secret_key = input('Enter your secret key: ')
-    session_token = input('Enter your session_token: ')
-    region = input('Enter your region: ')
-    
-    validate, response, session = validate_creds(access_key, secret_key, session_token, region)
-    print(response)
-    
-    print("Discovering enabled services...")
-    enabled_services = discover_enabled_services(session)
-    print(f"Found {len(enabled_services)} services: {', '.join(enabled_services)}")
-    
-    print("\nRunning CIS benchmarks...")
+def thread_audits(enabled_services,session):
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run_audit, s, session) for s in enabled_services if s in AUDIT_MODULES]
         all_results = [f.result() for f in futures]
-    
-    consolidated = organize_results(all_results)
-    print(json.dumps(consolidated, indent=2))  # Optional: print results nicely
+    return all_results
 
-if __name__ == "__main__":
-    main()

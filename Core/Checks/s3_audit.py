@@ -110,27 +110,10 @@ def check_cis_2_1_3(session, buckets):
     return findings
 
 def generate_report(findings):
-    report = defaultdict(list)
-    
-    for finding in findings:
-        report[finding['check_id']].append({
-            'bucket': finding['resource'],
-            'status': finding['status'],
-            'evidence': finding['evidence']
-        })
-    
     print("S3 CIS Benchmark Results:")
-    for check_id, results in report.items():
-        print(f"\n{check_id} Findings:")
-        print(f"{'-'*40}")
-        for result in results:
-            print(f"Bucket: {result['bucket']}")
-            print(f"Status: {result['status']}")
-            print(f"Evidence: {result['evidence']}")
-            print("-"*40)
-#to be implemented later
-def show_remediation(findings):
-    return 0
+    for finding in findings:
+        print(finding)
+        print("-"*40)
 
 def run_audit(session):
     #run all cis benchmarks
@@ -145,7 +128,7 @@ def run_audit(session):
     all_findings.extend(check_cis_2_1_3(session, buckets))
     
     generate_report(all_findings)
-    show_remediation(all_findings)
+    
 
 # Example usage:
 # from auth import get_aws_session
