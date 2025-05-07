@@ -29,13 +29,10 @@ This project is an automated security assessment tool that evaluates AWS environ
 ```
 CIS_Benchmark/
 ├── Cli/
-│   ├── __pycache__/
 │   ├── __init__.py
 │   └── main.py              # Command-line interface entry point
 ├── Core/
-│   ├── __pycache__/
 │   ├── Checks/
-│   │   ├── __pycache__/
 │   │   ├── __init__.py
 │   │   ├── ec2_audit.py     # EC2-specific checks
 │   │   ├── iam_audit.py     # IAM-specific checks
