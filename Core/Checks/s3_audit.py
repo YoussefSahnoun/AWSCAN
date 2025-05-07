@@ -109,6 +109,79 @@ def check_cis_2_1_3(session, buckets):
                 })
     return findings
 
+def check_cis_2_1_2(session, buckets):
+    # CIS 2.1.2: Ensure S3 Bucket Policy is set to deny HTTP requests
+    findings = []
+    s3 = session.client('s3')
+    
+    for bucket in buckets:
+        bucket_name = bucket['Name']
+        try:
+            response = s3.get_bucket_policy(Bucket=bucket_name)
+            policy = json.loads(response['Policy'])
+            statements = policy.get("Statement", [])
+            deny_http_found = False
+            
+            for statement in statements:
+                effect = statement.get("Effect", "")
+                condition = statement.get("Condition", {})
+                
+                if effect == "Deny":
+                    if "Bool" in condition and condition["Bool"].get("aws:SecureTransport") == "false":
+                        deny_http_found = True
+                    elif "NumericLessThan" in condition and condition["NumericLessThan"].get("s3:TlsVersion", 1.2) < 1.2:
+                        deny_http_found = True
+
+            if deny_http_found:
+                findings.append({
+                    'check_id': 'CIS-2.1.2',
+                    'status': 'PASS',
+                    'resource': bucket_name,
+                    'evidence': 'Bucket policy denies non-HTTPS access',
+                    'remediation': None
+                })
+            else:
+                findings.append({
+                    'check_id': 'CIS-2.1.2',
+                    'status': 'FAIL',
+                    'resource': bucket_name,
+                    'evidence': 'No Deny statement for non-HTTPS access found',
+                    'remediation': (
+                        "Apply a bucket policy to deny unencrypted (HTTP) access:\n"
+                        '{\n'
+                        '  "Effect": "Deny",\n'
+                        '  "Principal": "*",\n'
+                        '  "Action": "s3:*",\n'
+                        '  "Resource": "arn:aws:s3:::{bucket}/*",\n'
+                        '  "Condition": {\n'
+                        '    "Bool": {\n'
+                        '      "aws:SecureTransport": "false"\n'
+                        '    }\n'
+                        '  }\n'
+                        '}\n'
+                    ).format(bucket=bucket_name)
+                })
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchBucketPolicy':
+                findings.append({
+                    'check_id': 'CIS-2.1.2',
+                    'status': 'FAIL',
+                    'resource': bucket_name,
+                    'evidence': 'No bucket policy configured',
+                    'remediation': "Create a policy that denies access when aws:SecureTransport is false"
+                })
+            else:
+                findings.append({
+                    'check_id': 'CIS-2.1.2',
+                    'status': 'ERROR',
+                    'resource': bucket_name,
+                    'evidence': f"Access denied or error: {e}",
+                    'remediation': "Add s3:GetBucketPolicy permission"
+                })
+    
+    return findings
+
+
 def generate_report(findings):
     print("S3 CIS Benchmark Results:")
     for finding in findings:
@@ -126,6 +199,7 @@ def run_audit(session):
     all_findings = []
     all_findings.extend(check_cis_2_1_1(session, buckets))
     all_findings.extend(check_cis_2_1_3(session, buckets))
+    all_findings.extend(check_cis_2_1_2(session, buckets))
     
     generate_report(all_findings)
     
