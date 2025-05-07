@@ -28,7 +28,6 @@ This project is an automated security assessment tool that evaluates AWS environ
 
 ```
 CIS_Benchmark/
-├── cis_audit_tool.egg-info/
 ├── Cli/
 │   ├── __pycache__/
 │   ├── __init__.py
@@ -44,8 +43,6 @@ CIS_Benchmark/
 │   ├── __init__.py
 │   ├── auth.py              # AWS authentication handling
 │   └── orchestrator.py      # Orchestrates the scanning process
-├── .gitignore
-├── README.md
 └── setup.py                 # Package installation configuration
 ```
 
