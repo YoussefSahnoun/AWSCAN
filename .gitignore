@@ -1,2 +1,4 @@
 __pycache__/
 *.egg-info/
+webinterface/frontend/node_modules/
+webinterface/backend/venv/
