@@ -292,6 +292,318 @@ def check_cis_3_4(session):
 
     return findings
 
+def check_cis_3_5(session):
+    # CIS 3.5: Ensure CloudTrail logs are encrypted at rest using KMS CMKs
+    findings = []
+    regions = get_all_regions(session)
+
+    for region in regions:
+        try:
+            cloudtrail_client = session.client('cloudtrail', region_name=region)
+            trails = cloudtrail_client.describe_trails()['trailList']
+
+            for trail in trails:
+                trail_name = trail.get('Name', 'Unknown')
+                kms_key_id = trail.get('KmsKeyId')
+
+                if kms_key_id:
+                    findings.append({
+                        'check_id': 'CIS-3.5',
+                        'status': 'PASS',
+                        'resource': f"CloudTrail: {trail_name} (Region: {region})",
+                        'evidence': f"Trail is encrypted with KMS CMK: {kms_key_id}",
+                        'remediation': None
+                    })
+                else:
+                    findings.append({
+                        'check_id': 'CIS-3.5',
+                        'status': 'FAIL',
+                        'resource': f"CloudTrail: {trail_name} (Region: {region})",
+                        'evidence': 'Trail is not encrypted with a KMS Customer Master Key (CMK)',
+                        'remediation': (
+                            "1. Choose or create a KMS CMK.\n"
+                            "2. Run the following command to enable KMS encryption on the trail:\n"
+                            "aws cloudtrail update-trail --name <trail-name> --kms-id <kms-key-id>\n"
+                            "3. Optionally, attach a key policy to the KMS key if required:\n"
+                            "aws kms put-key-policy --key-id <kms-key-id> --policy <policy-document>"
+                        )
+                    })
+        except Exception as e:
+            findings.append({
+                'check_id': 'CIS-3.5',
+                'status': 'FAIL',
+                'resource': f"CloudTrail (Region: {region})",
+                'evidence': f"Error checking KMS encryption: {str(e)}",
+                'remediation': (
+                    "Ensure CloudTrail is available and that you have the necessary IAM permissions to describe trails."
+                )
+            })
+
+    return findings
+
+def check_cis_3_6(session):
+    # CIS 3.6: Ensure rotation for customer-created symmetric CMKs is enabled
+    findings = []
+    regions = get_all_regions(session)
+
+    for region in regions:
+        try:
+            kms_client = session.client('kms', region_name=region)
+            paginator = kms_client.get_paginator('list_keys')
+            for page in paginator.paginate():
+                for key in page['Keys']:
+                    key_id = key['KeyId']
+                    key_metadata = kms_client.describe_key(KeyId=key_id)['KeyMetadata']
+
+                    # Skip AWS-managed keys and asymmetric keys
+                    if key_metadata['KeyManager'] != 'CUSTOMER' or key_metadata['KeySpec'].startswith('RSA') or key_metadata['KeySpec'].startswith('ECC'):
+                        continue
+
+                    rotation_enabled = kms_client.get_key_rotation_status(KeyId=key_id)['KeyRotationEnabled']
+
+                    if rotation_enabled:
+                        findings.append({
+                            'check_id': 'CIS-3.6',
+                            'status': 'PASS',
+                            'resource': f"KMS Key ID: {key_id} (Region: {region})",
+                            'evidence': 'Key rotation is enabled',
+                            'remediation': None
+                        })
+                    else:
+                        findings.append({
+                            'check_id': 'CIS-3.6',
+                            'status': 'FAIL',
+                            'resource': f"KMS Key ID: {key_id} (Region: {region})",
+                            'evidence': 'Key rotation is not enabled',
+                            'remediation': (
+                                "Enable key rotation for this customer-managed symmetric KMS key using:\n"
+                                "aws kms enable-key-rotation --key-id <kms-key-id>"
+                            )
+                        })
+        except Exception as e:
+            findings.append({
+                'check_id': 'CIS-3.6',
+                'status': 'FAIL',
+                'resource': f"KMS (Region: {region})",
+                'evidence': f"Error checking key rotation: {str(e)}",
+                'remediation': 'Verify KMS permissions and configuration in this region.'
+            })
+
+    return findings
+
+def check_cis_3_7(session):
+    # CIS 3.7: Ensure VPC flow logging is enabled in all VPCs
+    findings = []
+    regions = get_all_regions(session)
+
+    for region in regions:
+        try:
+            ec2_client = session.client('ec2', region_name=region)
+            logs_client = session.client('logs', region_name=region)
+
+            vpcs = ec2_client.describe_vpcs()['Vpcs']
+
+            for vpc in vpcs:
+                vpc_id = vpc['VpcId']
+                flow_logs = ec2_client.describe_flow_logs(
+                    Filters=[{'Name': 'resource-id', 'Values': [vpc_id]}]
+                )['FlowLogs']
+
+                if any(log['TrafficType'] == 'REJECT' for log in flow_logs):
+                    findings.append({
+                        'check_id': 'CIS-3.7',
+                        'status': 'PASS',
+                        'resource': f"VPC ID: {vpc_id} (Region: {region})",
+                        'evidence': 'Flow logging for REJECT traffic is enabled',
+                        'remediation': None
+                    })
+                else:
+                    findings.append({
+                        'check_id': 'CIS-3.7',
+                        'status': 'FAIL',
+                        'resource': f"VPC ID: {vpc_id} (Region: {region})",
+                        'evidence': 'No VPC flow log with traffic type REJECT',
+                        'remediation': (
+                            "Enable VPC flow logging for REJECT traffic:\n"
+                            "1. Create IAM role and policy (see CIS 3.7 remediation steps).\n"
+                            "2. Run:\n"
+                            "aws ec2 create-flow-logs --resource-type VPC "
+                            "--resource-ids <vpc-id> --traffic-type REJECT "
+                            "--log-group-name <log-group-name> "
+                            "--deliver-logs-permission-arn <iam-role-arn>"
+                        )
+                    })
+        except Exception as e:
+            findings.append({
+                'check_id': 'CIS-3.7',
+                'status': 'FAIL',
+                'resource': f"VPCs (Region: {region})",
+                'evidence': f"Error checking VPC flow logs: {str(e)}",
+                'remediation': 'Verify EC2 permissions and VPC configuration in this region.'
+            })
+
+    return findings
+
+def check_cis_3_8(session):
+    # CIS 3.8: Ensure object-level logging for write events is enabled for S3 buckets
+    findings = []
+    regions = get_all_regions(session)
+
+    for region in regions:
+        try:
+            cloudtrail_client = session.client('cloudtrail', region_name=region)
+            s3_client = session.client('s3', region_name=region)
+
+            # List all S3 buckets
+            buckets_response = s3_client.list_buckets()
+            buckets = buckets_response.get('Buckets', [])
+
+            # List all trails in the region
+            trails = cloudtrail_client.describe_trails()['trailList']
+
+            if not trails:
+                findings.append({
+                    'check_id': 'CIS-3.8',
+                    'status': 'FAIL',
+                    'resource': f'All buckets in {region}',
+                    'evidence': 'No CloudTrail trail found in region.',
+                    'remediation': 'Create a CloudTrail trail in the region and enable object-level logging.'
+                })
+                continue
+
+            for bucket in buckets:
+                bucket_name = bucket['Name']
+                bucket_arn = f"arn:aws:s3:::{bucket_name}/"
+                write_logging_enabled = False
+
+                for trail in trails:
+                    trail_name = trail['Name']
+                    try:
+                        selectors = cloudtrail_client.get_event_selectors(TrailName=trail_name)
+                        for selector in selectors.get('EventSelectors', []):
+                            if selector.get('ReadWriteType') in ['WriteOnly', 'All'] and selector.get('IncludeManagementEvents'):
+                                for resource in selector.get('DataResources', []):
+                                    if resource.get('Type') == 'AWS::S3::Object':
+                                        for value in resource.get('Values', []):
+                                            if value == bucket_arn or value == "arn:aws:s3":
+                                                write_logging_enabled = True
+                    except Exception as e:
+                        continue  # Skip error for this trail
+
+                if write_logging_enabled:
+                    findings.append({
+                        'check_id': 'CIS-3.8',
+                        'status': 'PASS',
+                        'resource': f"S3 Bucket: {bucket_name} (Region: {region})",
+                        'evidence': 'Object-level write events are being logged in CloudTrail',
+                        'remediation': None
+                    })
+                else:
+                    findings.append({
+                        'check_id': 'CIS-3.8',
+                        'status': 'FAIL',
+                        'resource': f"S3 Bucket: {bucket_name} (Region: {region})",
+                        'evidence': 'Object-level write events are not logged',
+                        'remediation': (
+                            "Enable object-level write logging in CloudTrail:\n"
+                            "aws cloudtrail put-event-selectors --region <region> --trail-name <trail-name> "
+                            "--event-selectors '[{\"ReadWriteType\": \"WriteOnly\", "
+                            "\"IncludeManagementEvents\": true, \"DataResources\": [{\"Type\": \"AWS::S3::Object\", "
+                            "\"Values\": [\"arn:aws:s3:::<bucket-name>/\"]}]}]'"
+                        )
+                    })
+
+        except Exception as e:
+            findings.append({
+                'check_id': 'CIS-3.8',
+                'status': 'FAIL',
+                'resource': f"S3 Buckets in {region}",
+                'evidence': f"Error checking CloudTrail settings: {str(e)}",
+                'remediation': 'Verify CloudTrail permissions and region availability.'
+            })
+
+    return findings
+
+def check_cis_3_9(session):
+    # CIS 3.9: Ensure object-level logging for read events is enabled for S3 buckets
+    findings = []
+    regions = get_all_regions(session)
+
+    for region in regions:
+        try:
+            cloudtrail_client = session.client('cloudtrail', region_name=region)
+            s3_client = session.client('s3', region_name=region)
+
+            # List all S3 buckets
+            buckets_response = s3_client.list_buckets()
+            buckets = buckets_response.get('Buckets', [])
+
+            # List all trails in the region
+            trails = cloudtrail_client.describe_trails()['trailList']
+
+            if not trails:
+                findings.append({
+                    'check_id': 'CIS-3.9',
+                    'status': 'FAIL',
+                    'resource': f'All buckets in {region}',
+                    'evidence': 'No CloudTrail trail found in region.',
+                    'remediation': 'Create a CloudTrail trail in the region and enable object-level logging for read events.'
+                })
+                continue
+
+            for bucket in buckets:
+                bucket_name = bucket['Name']
+                bucket_arn = f"arn:aws:s3:::{bucket_name}/"
+                read_logging_enabled = False
+
+                for trail in trails:
+                    trail_name = trail['Name']
+                    try:
+                        selectors = cloudtrail_client.get_event_selectors(TrailName=trail_name)
+                        for selector in selectors.get('EventSelectors', []):
+                            if selector.get('ReadWriteType') in ['ReadOnly', 'All'] and selector.get('IncludeManagementEvents'):
+                                for resource in selector.get('DataResources', []):
+                                    if resource.get('Type') == 'AWS::S3::Object':
+                                        for value in resource.get('Values', []):
+                                            if value == bucket_arn or value == "arn:aws:s3":
+                                                read_logging_enabled = True
+                    except Exception as e:
+                        continue  # Skip error for this trail
+
+                if read_logging_enabled:
+                    findings.append({
+                        'check_id': 'CIS-3.9',
+                        'status': 'PASS',
+                        'resource': f"S3 Bucket: {bucket_name} (Region: {region})",
+                        'evidence': 'Object-level read events are being logged in CloudTrail',
+                        'remediation': None
+                    })
+                else:
+                    findings.append({
+                        'check_id': 'CIS-3.9',
+                        'status': 'FAIL',
+                        'resource': f"S3 Bucket: {bucket_name} (Region: {region})",
+                        'evidence': 'Object-level read events are not logged',
+                        'remediation': (
+                            "Enable object-level read logging in CloudTrail:\n"
+                            "aws cloudtrail put-event-selectors --region <region> --trail-name <trail-name> "
+                            "--event-selectors '[{\"ReadWriteType\": \"ReadOnly\", "
+                            "\"IncludeManagementEvents\": true, \"DataResources\": [{\"Type\": \"AWS::S3::Object\", "
+                            "\"Values\": [\"arn:aws:s3:::<bucket-name>/\"]}]}]'"
+                        )
+                    })
+
+        except Exception as e:
+            findings.append({
+                'check_id': 'CIS-3.9',
+                'status': 'FAIL',
+                'resource': f"S3 Buckets in {region}",
+                'evidence': f"Error checking CloudTrail settings: {str(e)}",
+                'remediation': 'Verify CloudTrail permissions and region availability.'
+            })
+
+    return findings
+
 def generate_report(findings):
     print("CloudTrail CIS Benchmark Results:")
     for finding in findings:
@@ -304,4 +616,9 @@ def run_audit(session):
     all_findings.extend(check_cis_3_2(session))
     all_findings.extend(check_cis_3_3(session))
     all_findings.extend(check_cis_3_4(session))
+    all_findings.extend(check_cis_3_5(session))
+    all_findings.extend(check_cis_3_6(session))
+    all_findings.extend(check_cis_3_7(session))
+    all_findings.extend(check_cis_3_8(session))
+    all_findings.extend(check_cis_3_9(session))
     generate_report(all_findings)
