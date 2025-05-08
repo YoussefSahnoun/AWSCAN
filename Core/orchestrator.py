@@ -6,12 +6,14 @@ import importlib
 import json  # Optional: for pretty printing
 
 # Mandatory services are audited regardless of resource presence
-MANDATORY_SERVICES = ['iam']  # IAM will always be audited
+MANDATORY_SERVICES = ['iam','logging','monitoring']  # IAM will always be audited
 
 # Conditional services are only audited if resources exist
 CONDITIONAL_SERVICES = {
     's3': ('s3', 'list_buckets', 'Buckets'),
     'ec2': ('ec2', 'describe_instances', 'Reservations'),
+    'efs': ('efs', 'describe_file_systems', 'FileSystems'),
+    'rds': ('rds', 'describe_db_instances', 'DBInstances')
 }
 
 # Map of service names to their respective audit modules
@@ -19,6 +21,10 @@ AUDIT_MODULES = {
     's3': 's3_audit',
     'iam': 'iam_audit',       # ADDED IAM MODULE
     'ec2': 'ec2_audit',     # To be added later
+    'efs': 'efs_audit',
+    'logging': 'logging_audit',
+    'monitoring': 'monitoring_audit',
+    'rds': 'rds_audit'
 }
 
 def discover_enabled_services(session):
