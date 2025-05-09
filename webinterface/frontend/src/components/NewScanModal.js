@@ -1,107 +1,109 @@
 import React, { useState } from 'react';
+import { Box, TextField, Button, CircularProgress, Typography } from '@mui/material';
 
 function NewScanModal({ onClose }) {
-    const [awsCreds, setAwsCreds] = useState({ accessKey: '', secretKey: '', region: '' });
+    const [awsCreds, setAwsCreds] = useState({
+        accessKey: '',
+        secretKey: '',
+        sessionToken: '',
+        region: '',
+    });
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        alert('New scan started!');
-        onClose();
+        setLoading(true);
+
+        // Simulate scan initiation
+        setTimeout(() => {
+            alert('Scan started successfully!');
+            setLoading(false);
+            onClose();
+        }, 3000);
     };
 
     return (
-        <div
-            style={{
+        <Box
+            sx={{
                 position: 'fixed',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                backgroundColor: '#2A2A40',
+                padding: '40px',
+                borderRadius: '12px',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
                 zIndex: 1000,
-                width: '400px',
+                width: '600px',
+                color: '#FFFFFF',
             }}
         >
-            <h2 style={{ marginBottom: '20px', fontSize: '22px', color: '#333' }}>New Scan</h2>
+            <Typography variant="h4" sx={{ marginBottom: '20px', textAlign: 'center' }}>
+                Start a New Scan
+            </Typography>
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Access Key"
+                <TextField
+                    label="AWS Access Key ID"
+                    variant="outlined"
+                    fullWidth
+                    required
                     value={awsCreds.accessKey}
                     onChange={(e) => setAwsCreds({ ...awsCreds, accessKey: e.target.value })}
-                    required
-                    style={{
-                        display: 'block',
-                        marginBottom: '10px',
-                        width: '100%',
-                        padding: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                    }}
+                    sx={{ marginBottom: '20px', backgroundColor: '#FFFFFF', borderRadius: '4px' }}
                 />
-                <input
-                    type="text"
-                    placeholder="Secret Key"
+                <TextField
+                    label="AWS Secret Access Key"
+                    variant="outlined"
+                    fullWidth
+                    required
                     value={awsCreds.secretKey}
                     onChange={(e) => setAwsCreds({ ...awsCreds, secretKey: e.target.value })}
-                    required
-                    style={{
-                        display: 'block',
-                        marginBottom: '10px',
-                        width: '100%',
-                        padding: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                    }}
+                    sx={{ marginBottom: '20px', backgroundColor: '#FFFFFF', borderRadius: '4px' }}
                 />
-                <input
-                    type="text"
-                    placeholder="Region"
+                <TextField
+                    label="AWS Session Token"
+                    variant="outlined"
+                    fullWidth
+                    value={awsCreds.sessionToken}
+                    onChange={(e) => setAwsCreds({ ...awsCreds, sessionToken: e.target.value })}
+                    sx={{ marginBottom: '20px', backgroundColor: '#FFFFFF', borderRadius: '4px' }}
+                />
+                <TextField
+                    label="Region"
+                    variant="outlined"
+                    fullWidth
+                    required
                     value={awsCreds.region}
                     onChange={(e) => setAwsCreds({ ...awsCreds, region: e.target.value })}
-                    required
-                    style={{
-                        display: 'block',
-                        marginBottom: '20px',
-                        width: '100%',
-                        padding: '10px',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                    }}
+                    sx={{ marginBottom: '20px', backgroundColor: '#FFFFFF', borderRadius: '4px' }}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <button
-                        type="submit"
-                        style={{
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 20px',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Start Scan
-                    </button>
-                    <button
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Button
                         type="button"
+                        variant="outlined"
+                        color="secondary"
                         onClick={onClose}
-                        style={{
-                            backgroundColor: '#f44336',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 20px',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                        }}
+                        sx={{ width: '48%' }}
                     >
                         Cancel
-                    </button>
-                </div>
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        disabled={loading}
+                        sx={{ width: '48%' }}
+                    >
+                        {loading ? 'Starting...' : 'Start Scan'}
+                    </Button>
+                </Box>
+                {loading && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                        <CircularProgress />
+                    </Box>
+                )}
             </form>
-        </div>
+        </Box>
     );
 }
 
