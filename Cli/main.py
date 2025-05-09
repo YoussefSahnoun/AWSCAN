@@ -22,7 +22,7 @@ def main(access_key, secret_key, session_token, region, output):
     
     click.echo("\nRunning CIS benchmarks...")
     all_results=orchestrator.thread_audits(enabled_services,session)
-    
+    click.echo(all_results)
     consolidated = orchestrator.organize_results(all_results)
     
     

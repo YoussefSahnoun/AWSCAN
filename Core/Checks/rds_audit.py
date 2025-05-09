@@ -20,13 +20,11 @@ def get_rds_instances(session, region):
         return []
 
 def check_cis_2_2_1(session):
-    # CIS 2.2.1: Ensure RDS encryption-at-rest is enabled
     findings = []
     regions = get_all_regions(session)
 
     for region in regions:
         db_instances = get_rds_instances(session, region)
-        
         for db in db_instances:
             db_id = db['DBInstanceIdentifier']
             encrypted = db.get('StorageEncrypted', False)
@@ -36,7 +34,8 @@ def check_cis_2_2_1(session):
                     'status': 'PASS',
                     'resource': f"{db_id} ({region})",
                     'evidence': 'Storage encryption is enabled',
-                    'remediation': None
+                    'remediation': None,
+                    'service': 'rds'
                 })
             else:
                 findings.append({
@@ -52,19 +51,18 @@ def check_cis_2_2_1(session):
                         "--target-db-snapshot-identifier {db_id}-snapshot-encrypted --kms-key-id <kms-key-id>\n"
                         "4. aws rds restore-db-instance-from-db-snapshot --region {region} "
                         "--db-instance-identifier {db_id}-encrypted --db-snapshot-identifier {db_id}-snapshot-encrypted\n"
-                    ).format(db_id=db_id, region=region)
+                    ).format(db_id=db_id, region=region),
+                    'service': 'rds'
                 })
 
     return findings
 
 def check_cis_2_2_2(session):
-    # CIS 2.2.2: Ensure Auto Minor Version Upgrade is enabled for RDS instances
     findings = []
     regions = get_all_regions(session)
 
     for region in regions:
         db_instances = get_rds_instances(session, region)
-        
         for instance in db_instances:
             instance_id = instance['DBInstanceIdentifier']
             try:
@@ -75,7 +73,8 @@ def check_cis_2_2_2(session):
                         'status': 'PASS',
                         'resource': f"{instance_id} ({region})",
                         'evidence': 'Auto Minor Version Upgrade is enabled',
-                        'remediation': None
+                        'remediation': None,
+                        'service': 'rds'
                     })
                 else:
                     findings.append({
@@ -88,7 +87,8 @@ def check_cis_2_2_2(session):
                             "CLI example:\n"
                             "aws rds modify-db-instance --region {region} --db-instance-identifier {instance} "
                             "--auto-minor-version-upgrade --apply-immediately"
-                        ).format(instance=instance_id, region=region)
+                        ).format(instance=instance_id, region=region),
+                        'service': 'rds'
                     })
             except ClientError as e:
                 findings.append({
@@ -96,23 +96,22 @@ def check_cis_2_2_2(session):
                     'status': 'ERROR',
                     'resource': f"{instance_id} ({region})",
                     'evidence': f"Access denied or error: {e}",
-                    'remediation': "Ensure the IAM role has rds:DescribeDBInstances permission"
+                    'remediation': "Ensure the IAM role has rds:DescribeDBInstances permission",
+                    'service': 'rds'
                 })
-    
+
     return findings
 
 def check_cis_2_2_3(session):
-    # CIS 2.2.3: Ensure that RDS instances are not publicly accessible
     findings = []
     regions = get_all_regions(session)
 
     for region in regions:
         db_instances = get_rds_instances(session, region)
-
         for db in db_instances:
             db_id = db['DBInstanceIdentifier']
             publicly_accessible = db.get('PubliclyAccessible', False)
-            
+
             if publicly_accessible:
                 findings.append({
                     'check_id': 'CIS-2.2.3',
@@ -126,7 +125,8 @@ def check_cis_2_2_3(session):
                         "If the RDS instance is in a public subnet, consider modifying its subnet configuration and route table:\n"
                         "- Ensure no route in the subnet's route table allows 0.0.0.0/0 via an Internet Gateway (igw-xxxxxxxx).\n"
                         "- Move the instance to private subnets if needed."
-                    )
+                    ),
+                    'service': 'rds'
                 })
             else:
                 findings.append({
@@ -134,7 +134,8 @@ def check_cis_2_2_3(session):
                     'status': 'PASS',
                     'resource': f"{db_id} ({region})",
                     'evidence': 'RDS instance is not publicly accessible',
-                    'remediation': None
+                    'remediation': None,
+                    'service': 'rds'
                 })
 
     return findings
@@ -144,10 +145,10 @@ def generate_report(findings):
     for finding in findings:
         print(finding)
         print("-" * 40)
-
 def run_audit(session):
     all_findings = []
     all_findings.extend(check_cis_2_2_1(session))
     all_findings.extend(check_cis_2_2_2(session))
     all_findings.extend(check_cis_2_2_3(session))
     generate_report(all_findings)
+    return all_findings

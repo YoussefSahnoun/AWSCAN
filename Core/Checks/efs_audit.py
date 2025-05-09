@@ -2,7 +2,7 @@
 import boto3
 
 def get_all_regions(session):
-    ec2 = session.client('ec2', region_name='us-east-1')
+    ec2 = session.client('ec2')
     regions_info = ec2.describe_regions(AllRegions=True)
     return [region['RegionName'] for region in regions_info['Regions'] if region['OptInStatus'] in ['opt-in-not-required', 'opted-in']]
 
@@ -60,3 +60,4 @@ def run_audit(session):
     all_findings = []
     all_findings.extend(check_cis_2_3_1(session))
     generate_report(all_findings)
+    return all_findings
