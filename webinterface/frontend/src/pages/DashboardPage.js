@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Box, Grid, Card, Typography, Button, TextField } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Grid, Card, TextField, IconButton } from '@mui/material';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, Title, Tooltip, Legend, ArcElement, PointElement } from 'chart.js';
 import NewScanModal from '../components/NewScanModal';
 import ScanHistory from '../components/ScanHistory';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import HistoryIcon from '@mui/icons-material/History';
-import ReportIcon from '@mui/icons-material/Assessment';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, ArcElement, PointElement, Title, Tooltip, Legend);
 
@@ -53,45 +52,57 @@ function DashboardPage() {
     };
 
     return (
-        <Box sx={{ display: 'flex', backgroundColor: '#1E1E2F', minHeight: '100vh', color: '#FFFFFF' }}>
-            {/* Sidebar */}
-            <Box
-                sx={{
-                    width: '250px',
-                    backgroundColor: '#2A2A40',
-                    padding: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '20px',
-                }}
-            >
-                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#FFFFFF', textAlign: 'center' }}>
-                    AWS Dashboard
-                </Typography>
-                <Button startIcon={<DashboardIcon />} variant="text" sx={{ color: '#FFFFFF', justifyContent: 'flex-start' }}>
-                    Dashboard
-                </Button>
-                <Button startIcon={<HistoryIcon />} variant="text" sx={{ color: '#FFFFFF', justifyContent: 'flex-start' }}>
-                    Manage Scans
-                </Button>
-                <Button startIcon={<ReportIcon />} variant="text" sx={{ color: '#FFFFFF', justifyContent: 'flex-start' }}>
-                    Reports
-                </Button>
-            </Box>
+        <Box sx={{ backgroundColor: '#121212', minHeight: '100vh', color: '#FFFFFF' }}>
+            {/* Navbar */}
+            <AppBar position="static" sx={{ backgroundColor: '#1F1F2E', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)' }}>
+                <Toolbar>
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            flexGrow: 1,
+                            fontWeight: 'bold',
+                            fontFamily: 'Roboto, sans-serif',
+                            background: 'linear-gradient(90deg, #36A2EB, #4CAF50)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            letterSpacing: '2px',
+                        }}
+                    >
+                        awscan
+                    </Typography>
+                    <Button color="inherit" sx={{ fontWeight: 'bold', marginRight: '15px' }}>
+                        Scan Reports
+                    </Button>
+                    <Button color="inherit" sx={{ fontWeight: 'bold', marginRight: '15px' }}>
+                        About Us
+                    </Button>
+                    <Button color="inherit" sx={{ fontWeight: 'bold', marginRight: '15px' }}>
+                        Contact
+                    </Button>
+                    <Button color="inherit" sx={{ fontWeight: 'bold' }}>
+                        Help
+                    </Button>
+                </Toolbar>
+            </AppBar>
 
             {/* Main Content */}
-            <Box sx={{ flex: 1, padding: '20px', textAlign: 'center' }}>
+            <Box sx={{ padding: '30px' }}>
                 {/* Top Metrics */}
-                <Grid container spacing={3} justifyContent="center">
+                <Grid container spacing={4} justifyContent="center">
                     {['Total Scans', 'High Severity Issues', 'Medium Severity Issues', 'Low Severity Issues'].map((title, index) => (
                         <Grid item xs={12} md={3} key={index}>
                             <Card
                                 sx={{
-                                    background: `linear-gradient(135deg, ${['#4CAF50', '#FF5722', '#FFC107', '#36A2EB'][index]} 30%, #2A2A40 90%)`,
+                                    background: `linear-gradient(135deg, ${['#4CAF50', '#FF5722', '#FFC107', '#36A2EB'][index]} 30%, #1F1F2E 90%)`,
                                     color: '#FFFFFF',
                                     padding: '20px',
                                     textAlign: 'center',
-                                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)',
+                                    boxShadow: '0 6px 15px rgba(0, 0, 0, 0.5)',
+                                    borderRadius: '16px',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.05)',
+                                    },
                                 }}
                             >
                                 <Typography variant="h6">{title}</Typography>
@@ -104,9 +115,17 @@ function DashboardPage() {
                 </Grid>
 
                 {/* Charts Section */}
-                <Grid container spacing={3} sx={{ marginTop: '20px' }} justifyContent="center">
+                <Grid container spacing={4} sx={{ marginTop: '30px' }} justifyContent="center">
                     <Grid item xs={12} md={6}>
-                        <Card sx={{ backgroundColor: '#2A2A40', color: '#FFFFFF', padding: '20px', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)' }}>
+                        <Card
+                            sx={{
+                                backgroundColor: '#1F1F2E',
+                                color: '#FFFFFF',
+                                padding: '20px',
+                                boxShadow: '0 6px 15px rgba(0, 0, 0, 0.5)',
+                                borderRadius: '16px',
+                            }}
+                        >
                             <Box sx={{ marginBottom: '10px' }}>
                                 <Typography variant="h6">Scan Severity Overview</Typography>
                             </Box>
@@ -114,7 +133,15 @@ function DashboardPage() {
                         </Card>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <Card sx={{ backgroundColor: '#2A2A40', color: '#FFFFFF', padding: '20px', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)' }}>
+                        <Card
+                            sx={{
+                                backgroundColor: '#1F1F2E',
+                                color: '#FFFFFF',
+                                padding: '20px',
+                                boxShadow: '0 6px 15px rgba(0, 0, 0, 0.5)',
+                                borderRadius: '16px',
+                            }}
+                        >
                             <Box sx={{ marginBottom: '10px' }}>
                                 <Typography variant="h6">Scans Over Time</Typography>
                             </Box>
@@ -122,7 +149,15 @@ function DashboardPage() {
                         </Card>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <Card sx={{ backgroundColor: '#2A2A40', color: '#FFFFFF', padding: '20px', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)' }}>
+                        <Card
+                            sx={{
+                                backgroundColor: '#1F1F2E',
+                                color: '#FFFFFF',
+                                padding: '20px',
+                                boxShadow: '0 6px 15px rgba(0, 0, 0, 0.5)',
+                                borderRadius: '16px',
+                            }}
+                        >
                             <Box sx={{ marginBottom: '10px' }}>
                                 <Typography variant="h6">Severity Distribution</Typography>
                             </Box>
@@ -132,18 +167,35 @@ function DashboardPage() {
                 </Grid>
 
                 {/* Add New Scan Button */}
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setShowNewScanModal(true)}
-                    sx={{ marginTop: '20px', marginBottom: '20px' }}
-                >
-                    Add New Scan
-                </Button>
+                <Box sx={{ textAlign: 'center', marginTop: '30px' }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setShowNewScanModal(true)}
+                        sx={{
+                            backgroundColor: '#4CAF50',
+                            padding: '10px 30px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            borderRadius: '8px',
+                            '&:hover': { backgroundColor: '#45A049' },
+                        }}
+                    >
+                        Add New Scan
+                    </Button>
+                </Box>
 
                 {/* Scan History */}
-                <Grid item xs={12}>
-                    <Card sx={{ backgroundColor: '#2A2A40', color: '#FFFFFF', padding: '20px', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)' }}>
+                <Grid item xs={12} sx={{ marginTop: '30px' }}>
+                    <Card
+                        sx={{
+                            backgroundColor: '#1F1F2E',
+                            color: '#FFFFFF',
+                            padding: '20px',
+                            boxShadow: '0 6px 15px rgba(0, 0, 0, 0.5)',
+                            borderRadius: '16px',
+                        }}
+                    >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                             <Typography variant="h6">Scan History</Typography>
                             <TextField
