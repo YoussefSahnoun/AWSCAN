@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Grid, Card, TextField, IconButton } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Grid, Card, Modal, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, Title, Tooltip, Legend, ArcElement, PointElement } from 'chart.js';
 import NewScanModal from '../components/NewScanModal';
 import ScanHistory from '../components/ScanHistory';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { TextField } from '@mui/material';
+import jsPDF from 'jspdf';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, ArcElement, PointElement, Title, Tooltip, Legend);
 
 function DashboardPage() {
     const [showNewScanModal, setShowNewScanModal] = useState(false);
+    const [showScanReportsModal, setShowScanReportsModal] = useState(false);
 
     const barChartData = {
         labels: ['Scan #1', 'Scan #2', 'Scan #3', 'Scan #4', 'Scan #5'],
@@ -51,6 +52,29 @@ function DashboardPage() {
         ],
     };
 
+    const scans = [
+        { id: 1, name: 'Scan #1', high: 5, medium: 10, low: 15 },
+        { id: 2, name: 'Scan #2', high: 3, medium: 7, low: 30 },
+        { id: 3, name: 'Scan #3', high: 8, medium: 5, low: 55 },
+    ];
+
+    const generatePDF = (scan) => {
+        const doc = new jsPDF();
+
+        // Add title
+        doc.setFontSize(18);
+        doc.text(`Scan Report: ${scan.name}`, 10, 10);
+
+        // Add content
+        doc.setFontSize(12);
+        doc.text(`High Severity Issues: ${scan.high}`, 10, 20);
+        doc.text(`Medium Severity Issues: ${scan.medium}`, 10, 30);
+        doc.text(`Low Severity Issues: ${scan.low}`, 10, 40);
+
+        // Save the PDF
+        doc.save(`${scan.name}_Report.pdf`);
+    };
+
     return (
         <Box sx={{ backgroundColor: '#121212', minHeight: '100vh', color: '#FFFFFF' }}>
             {/* Navbar */}
@@ -70,7 +94,11 @@ function DashboardPage() {
                     >
                         awscan
                     </Typography>
-                    <Button color="inherit" sx={{ fontWeight: 'bold', marginRight: '15px' }}>
+                    <Button
+                        color="inherit"
+                        sx={{ fontWeight: 'bold', marginRight: '15px' }}
+                        onClick={() => setShowScanReportsModal(true)}
+                    >
                         Scan Reports
                     </Button>
                     <Button color="inherit" sx={{ fontWeight: 'bold', marginRight: '15px' }}>
@@ -215,6 +243,65 @@ function DashboardPage() {
                     </Card>
                 </Grid>
             </Box>
+
+            {/* Scan Reports Modal */}
+            <Modal
+                open={showScanReportsModal}
+                onClose={() => setShowScanReportsModal(false)}
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+                <Box
+                    sx={{
+                        backgroundColor: '#1F1F2E',
+                        color: '#FFFFFF',
+                        padding: '20px',
+                        borderRadius: '8px',
+                        width: '80%',
+                        maxHeight: '80%',
+                        overflowY: 'auto',
+                    }}
+                >
+                    <Typography variant="h5" sx={{ marginBottom: '20px', textAlign: 'center' }}>
+                        Scan Reports
+                    </Typography>
+                    <TableContainer component={Paper} sx={{ backgroundColor: '#2A2A3C' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ color: '#FFFFFF' }}>Scan Name</TableCell>
+                                    <TableCell sx={{ color: '#FFFFFF' }}>High Severity</TableCell>
+                                    <TableCell sx={{ color: '#FFFFFF' }}>Medium Severity</TableCell>
+                                    <TableCell sx={{ color: '#FFFFFF' }}>Low Severity</TableCell>
+                                    <TableCell sx={{ color: '#FFFFFF' }}>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {scans.map((scan) => (
+                                    <TableRow key={scan.id}>
+                                        <TableCell sx={{ color: '#FFFFFF' }}>{scan.name}</TableCell>
+                                        <TableCell sx={{ color: '#FFFFFF' }}>{scan.high}</TableCell>
+                                        <TableCell sx={{ color: '#FFFFFF' }}>{scan.medium}</TableCell>
+                                        <TableCell sx={{ color: '#FFFFFF' }}>{scan.low}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => generatePDF(scan)}
+                                                sx={{
+                                                    backgroundColor: '#4CAF50',
+                                                    '&:hover': { backgroundColor: '#45A049' },
+                                                }}
+                                            >
+                                                Download
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
+            </Modal>
 
             {/* New Scan Modal */}
             {showNewScanModal && <NewScanModal onClose={() => setShowNewScanModal(false)} />}
