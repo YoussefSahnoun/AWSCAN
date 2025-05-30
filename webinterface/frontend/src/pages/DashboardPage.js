@@ -431,7 +431,7 @@ function DashboardPage() {
                         ) : allChecks.length > 0 ? (
                             <>
                                 <div style={{ margin: '24px 0' }}>
-                                    <Typography variant="subtitle1" sx={{ color: '#36A2EB', mb: 1 }}>Services Checked</Typography>
+                                    <Typography variant="subtitle1" sx={{ color: '#36A2EB', mb: 1 }}>Benchmarks Checked</Typography>
                                     {servicesChart}
                                     <div style={{ marginTop: 12 }}>{servicesList}</div>
                                 </div>

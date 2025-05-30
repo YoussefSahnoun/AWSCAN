@@ -125,7 +125,7 @@ def _build_pdf(path: str, report: dict):
 
     summary_table_data = [
         ['Total Failed Checks', str(total_fail)],
-        ['Services Checked', ', '.join(services)]
+        ['Benchmarks Checked', ', '.join(services)]
     ]
     for svc, count in resource_counts.items():
         summary_table_data.append([f'Resources in {svc}', str(count)])
