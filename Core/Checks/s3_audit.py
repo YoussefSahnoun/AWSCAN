@@ -161,10 +161,10 @@ def check_cis_2_1_2(session, buckets):
                         f"Apply bucket policy to deny HTTP access:\n"  
                         "{\"Effect\": \"Deny\",}\n"  
                         "{\"Principal\": \"*\",}\n"  
-                        f"{{\"Resource\": \"arn:aws:s3:::{bucket_name}/*\"}},}\n"  
-                        "{\"Condition\": {\"Bool\": {\"aws:SecureTransport\": \"false\"}}}"
-                    )
-                })
+                        f"{{\"Resource\": \"arn:aws:s3:::{bucket_name}/*\"}},\n"  
+                        "{\"Condition\": {\"Bool\": {\"aws:SecureTransport\": \"false\"}}}")
+                    })
+                        
         except ClientError as e:
             code = e.response['Error']['Code']
             if code == 'NoSuchBucketPolicy':
@@ -195,7 +195,7 @@ def generate_report(findings):
         print("-" * 40)
 
 
-def run_s3_audit(session):
+def run_audit(session):
     buckets = get_s3_buckets(session)
     if not buckets:
         print("No S3 buckets found")

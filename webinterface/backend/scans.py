@@ -2,6 +2,8 @@
 
 from flask import Blueprint, jsonify, request, send_from_directory
 from utils import list_json_results, run_scan_and_save_pdf
+import os
+import json
 
 bp = Blueprint('scans', __name__)
 
@@ -9,8 +11,35 @@ bp = Blueprint('scans', __name__)
 def list_scans():
     """
     List available raw JSON scan outputs in 'scans/'.
+    Also returns status (success/failed/unknown) for each scan.
     """
-    return jsonify(list_json_results('scans')), 200
+    scan_files = list_json_results('scans')
+    scan_list = []
+    for filename in scan_files:
+        status = "unknown"
+        # Try to read the JSON and look for a "status" field, or infer from content
+        try:
+            with open(os.path.join('scans', filename), 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                # You can adjust this logic based on your report structure
+                if "status" in data:
+                    status = data["status"]
+                elif "failed" in filename.lower():
+                    status = "failed"
+                elif "success" in filename.lower():
+                    status = "success"
+                else:
+                    # Try to infer from data (example: if there are failed checks)
+                    if "summary" in data and "failed" in data["summary"]:
+                        if data["summary"]["failed"] > 0:
+                            status = "failed"
+                        else:
+                            status = "success"
+        except Exception:
+            # If file can't be read, keep status unknown
+            pass
+        scan_list.append({"filename": filename, "status": status})
+    return jsonify(scan_list), 200
 
 @bp.route('/run', methods=['POST'])
 def run_scan():
@@ -40,9 +69,12 @@ def run_scan():
             region=region,
             folder='scans'
         )
+        # Optionally, add a status field to the returned JSON
+        if "summary" in report_json and "failed" in report_json["summary"]:
+            report_json["status"] = "failed" if report_json["summary"]["failed"] > 0 else "success"
         return jsonify(report_json), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'status': 'failed'}), 500
 
 @bp.route('/results/<path:filename>', methods=['GET'])
 def get_json(filename):

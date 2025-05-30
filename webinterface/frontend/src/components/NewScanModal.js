@@ -9,17 +9,42 @@ function NewScanModal({ onClose }) {
         region: '',
     });
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
+        setSuccess('');
 
-        // Simulate scan initiation
-        setTimeout(() => {
-            alert('Scan started successfully!');
+        try {
+            const response = await fetch('http://localhost:5000/scans/run', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    access_key: awsCreds.accessKey,
+                    secret_key: awsCreds.secretKey,
+                    session_token: awsCreds.sessionToken,
+                    region: awsCreds.region,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to start scan');
+            }
+
+            setSuccess('Scan started successfully!');
+            setTimeout(() => {
+                setLoading(false);
+                onClose();
+            }, 1500);
+        } catch (err) {
+            setError(err.message);
             setLoading(false);
-            onClose();
-        }, 3000);
+        }
     };
 
     return (
@@ -84,6 +109,7 @@ function NewScanModal({ onClose }) {
                         color="secondary"
                         onClick={onClose}
                         sx={{ width: '48%' }}
+                        disabled={loading}
                     >
                         Cancel
                     </Button>
@@ -101,6 +127,12 @@ function NewScanModal({ onClose }) {
                     <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                         <CircularProgress />
                     </Box>
+                )}
+                {error && (
+                    <Typography sx={{ color: 'red', mt: 2, textAlign: 'center' }}>{error}</Typography>
+                )}
+                {success && (
+                    <Typography sx={{ color: 'lightgreen', mt: 2, textAlign: 'center' }}>{success}</Typography>
                 )}
             </form>
         </Box>
