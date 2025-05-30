@@ -240,20 +240,15 @@ function DashboardPage() {
             {/* Navbar */}
             <AppBar position="static" sx={{ backgroundColor: '#1F1F2E', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)' }}>
                 <Toolbar>
-                    <Typography
-                        variant="h4"
-                        sx={{
-                            flexGrow: 1,
-                            fontWeight: 'bold',
-                            fontFamily: 'Roboto, sans-serif',
-                            background: 'linear-gradient(90deg, #36A2EB, #4CAF50)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            letterSpacing: '2px',
-                        }}
-                    >
-                        awscan
-                    </Typography>
+                    {/* Logo replaces the word "awscan" */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                        <img
+                            src="/logo.png"
+                            alt="awscan logo"
+                            style={{ height: 70, width: 70 }}
+                        />
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }} />
                     <Button
                         color="inherit"
                         sx={{ fontWeight: 'bold', marginRight: '15px' }}
@@ -354,7 +349,7 @@ function DashboardPage() {
             </Box>
 
             {/* Scan Reports Modal */}
-            <Modal
+             <Modal
                 open={showScanReportsModal}
                 onClose={() => setShowScanReportsModal(false)}
                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -381,7 +376,7 @@ function DashboardPage() {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell sx={{ color: '#FFFFFF' }}>Scan Name</TableCell>
-                                        <TableCell sx={{ color: '#FFFFFF' }}>Actions</TableCell>
+                                        {/* Removed Actions column */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -393,20 +388,7 @@ function DashboardPage() {
                                             >
                                                 {scan.name}
                                             </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    href={`http://localhost:4000/scans/results/${scan.name}`}
-                                                    target="_blank"
-                                                    sx={{
-                                                        backgroundColor: '#4CAF50',
-                                                        '&:hover': { backgroundColor: '#45A049' },
-                                                    }}
-                                                >
-                                                    Download JSON
-                                                </Button>
-                                            </TableCell>
+                                            {/* Removed Download JSON button cell */}
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -415,6 +397,7 @@ function DashboardPage() {
                     )}
                 </Box>
             </Modal>
+
 
             {/* Scan Report Chart Modal */}
             {selectedReportScan && (
