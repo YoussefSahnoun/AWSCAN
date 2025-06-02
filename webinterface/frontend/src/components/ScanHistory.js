@@ -219,7 +219,7 @@ function ScanHistory({ scans = [] }) {
                     ) : allChecks.length > 0 ? (
                         <>
                             <div style={{ margin: '24px 0' }}>
-                                <h4 style={{ color: '#36A2EB', marginBottom: 8 }}>Services Checked</h4>
+                                <h4 style={{ color: '#36A2EB', marginBottom: 8 }}>Benchmarks Checked</h4>
                                 {servicesChart}
                                 <div style={{ marginTop: 12 }}>{servicesList}</div>
                             </div>
