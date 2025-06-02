@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "cis-audit=Cli.main:main",  # This installs a CLI command named `cis-audit`
+            "awscan=Cli.main:main",  # This installs a CLI command named `cis-audit`
         ],
     },
 )
