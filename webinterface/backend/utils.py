@@ -96,7 +96,7 @@ def _build_pdf(path: str, report: dict):
     elems = []
 
     # ----- COVER PAGE -----
-    logo_path = 'static/logo.png'
+    logo_path = '../frontend/public/logo.png'
     if os.path.exists(logo_path):
         elems.append(Image(logo_path, width=2*inch, height=2*inch, hAlign='CENTER'))
         elems.append(Spacer(1, 0.2*inch))

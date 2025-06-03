@@ -206,7 +206,7 @@ def run_audit(session):
     all_findings.extend(check_cis_2_1_3(session, buckets))
     all_findings.extend(check_cis_2_1_2(session, buckets))
 
-    generate_report(all_findings)
+    #generate_report(all_findings)
     return all_findings
 
 # Example usage:
