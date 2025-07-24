@@ -1,4 +1,4 @@
-# awscan.py
+
 import json
 import click
 from concurrent.futures import ThreadPoolExecutor
