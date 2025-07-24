@@ -27,36 +27,17 @@ This project is an automated security assessment tool that evaluates AWS environ
 ### RDS Checks
 ### Monitoring Checks
 ### Logging Checks
-## Project Structure
-
-```
-AWSCAN/
-├── Cli/
-│   ├── __init__.py
-│   └── main.py              # Command-line interface entry point
-├── Core/
-│   ├── Checks/
-│   │   ├── __init__.py
-│   │   ├── ec2_audit.py     # EC2-specific checks
-│   │   ├── iam_audit.py     # IAM-specific checks
-│   │   └── s3_audit.py      # S3-specific checks
-│   ├── __init__.py
-│   ├── auth.py              # AWS authentication handling
-│   └── orchestrator.py      # Orchestrates the scanning process
-└── setup.py                 # Package installation configuration
-```
 
 ## Requirements
-
+- Node.js 21 or newer
 - Python 3.6 or higher
-- AWS Account with appropriate read-only permissions
+- AWS Account with the minimum IAM permissions required to run the scan (see “Required AWS Permissions” below).
 - The following Python packages:
   - boto3
   - click
 
 ## Installation
 
-### Option 1: Install from Source
 
 1. Clone the repository:
    ```bash
@@ -75,25 +56,27 @@ AWSCAN/
    pip install -e .
    ```
 
-### Option 2: Install via pip
 
-```bash
-pip install git+https://github.com/YoussefSahnoun/AWSCAN.git
-```
 
 ## Usage
 
-### Running the tool
+### Running the cli version
 
-If you're running from the cloned repository without installing:
 ```bash
-python Cli/main.py --access-key YOUR_ACCESS_KEY --secret-key YOUR_SECRET_KEY --session-token YOUR_SESSION_TOKEN --region us-east-1 --output json
+awscan --access-key YOUR_ACCESS_KEY --secret-key YOUR_SECRET_KEY --session-token YOUR_SESSION_TOKEN --region us-east-1 --output json
+```
+### Running the gui version (for Linux OS)
+```bash
+cd webinterface
+chmod +x build.sh
+./build.sh
+```
+### Running the gui version (for Windows OS)
+```powershell
+cd webinterface
+./build.ps1
 ```
 
-If you installed the package using either of the installation methods above:
-```bash
-cis-audit --access-key YOUR_ACCESS_KEY --secret-key YOUR_SECRET_KEY --session-token YOUR_SESSION_TOKEN --region us-east-1 --output json
-```
 
 ### Command-line Options
 
