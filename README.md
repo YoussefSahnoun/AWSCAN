@@ -1,7 +1,4 @@
 # AWSCAN
-usage:
-"pip install -e . "
-then run this command "awscan --help"
 
 # AWS Cloud Security Posture Management tool
 
