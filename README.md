@@ -1,9 +1,9 @@
-# CIS_Benchmark
+# AWSCAN
 usage:
 "pip install -e . "
-then run this command "cis-audit --help"
+then run this command "awscan --help"
 
-# AWS CIS Benchmark Automation Tool
+# AWS Cloud Security Posture Management tool
 
 ## Overview
 
@@ -27,7 +27,7 @@ This project is an automated security assessment tool that evaluates AWS environ
 ## Project Structure
 
 ```
-CIS_Benchmark/
+AWSCAN/
 ├── Cli/
 │   ├── __init__.py
 │   └── main.py              # Command-line interface entry point
@@ -57,8 +57,8 @@ CIS_Benchmark/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YoussefSahnoun/CIS_Benchmark.git
-   cd CIS_Benchmark
+   git clone https://github.com/YoussefSahnoun/AWSCAN.git
+   cd AWSCAN
    ```
 
 2. Create and activate a virtual environment (optional but recommended):
@@ -75,7 +75,7 @@ CIS_Benchmark/
 ### Option 2: Install via pip
 
 ```bash
-pip install git+https://github.com/YoussefSahnoun/CIS_Benchmark.git
+pip install git+https://github.com/YoussefSahnoun/AWSCAN.git
 ```
 
 ## Usage
@@ -141,28 +141,3 @@ To run all checks, the tool requires the following minimum AWS permissions:
 3. For each enabled service, it runs the relevant CIS benchmark checks
 4. Results are consolidated and output in your chosen format
 
-## Development
-
-### Adding New Checks
-
-To add a new check:
-
-1. Add your check function to the appropriate service file in `Core/Checks/`
-2. Follow the existing pattern for check functions
-3. Make sure your function returns findings in the standard format
-
-### Running Tests
-
-```bash
-# To be implemented
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
