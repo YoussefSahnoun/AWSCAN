@@ -23,7 +23,10 @@ This project is an automated security assessment tool that evaluates AWS environ
 ### IAM Checks
 ### S3 Checks
 ### EC2 Checks
-
+### EFS Checks
+### RDS Checks
+### Monitoring Checks
+### Logging Checks
 ## Project Structure
 
 ```
@@ -140,4 +143,7 @@ To run all checks, the tool requires the following minimum AWS permissions:
 2. It discovers which AWS services are enabled in your account
 3. For each enabled service, it runs the relevant CIS benchmark checks
 4. Results are consolidated and output in your chosen format
+
+## Important Notice
+-This is a proof‑of‑concept and does not yet implement the full CIS AWS Foundations Benchmark.
 
