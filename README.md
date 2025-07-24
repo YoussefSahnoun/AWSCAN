@@ -74,7 +74,7 @@ chmod +x build.sh
 ### Running the gui version (for Windows OS)
 ```powershell
 cd webinterface
-./build.ps1
+.\build.ps1
 ```
 
 
